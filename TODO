@@ -1,0 +1,6 @@
+TODO:
+  ☐ @critical use tauri certs here to check if works
+  ☐ try use this certificates in tauri project
+  ☐ websocat -k wss://localhost:8443/ws/ | jq
+  ☐ rename server.rs and Server to WebSocketServer
+  ☐ move from main and web_socket_server to to websocket module and clean up project
