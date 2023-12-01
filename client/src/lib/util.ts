@@ -14,7 +14,7 @@ export const log = (message: unknown, context?: string) => {
 
 export const getUriHost = (): string => {
   // without protocol
-  return '127.0.01:8443';
+  return 'localhost:8443';
   // log(`PORT: ${process.env.REACT_APP_PORT} && REACT_APP_PORT_WS: ${process.env.REACT_APP_PORT_WS}`);
   // return (process.env.REACT_APP_HOST_WS && process.env.REACT_APP_PORT_WS)
   //   ? `${process.env.REACT_APP_HOST_WS}:${process.env.REACT_APP_PORT_WS}`

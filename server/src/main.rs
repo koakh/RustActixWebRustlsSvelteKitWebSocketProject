@@ -15,26 +15,63 @@ use rustls_pemfile::{certs, pkcs8_private_keys};
 use std::time::Instant;
 use uuid::Uuid;
 
-mod server;
 mod constants;
-pub use self::server::*;
+mod server;
 pub use self::constants::*;
+pub use self::server::*;
 
 /// simple handle
 async fn index(req: HttpRequest) -> HttpResponse {
     debug!("{req:?}");
 
+    // HttpResponse::Ok().content_type(ContentType::html()).body(
+    //     "<!DOCTYPE html><html><body>\
+    //         <p>Welcome to your TLS-secured homepage!</p>\
+    //         <p>test <a href='static/ws.html'>websockets</a></p>
+    //     </body></html>",
+    // )
     HttpResponse::Ok().content_type(ContentType::html()).body(
-        "<!DOCTYPE html><html><body>\
-            <p>Welcome to your TLS-secured homepage!</p>\
-            <p>test <a href='static/ws.html'>websockets</a></p>
-        </body></html>",
+    r#"<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>WebSocket Example</title>
+    </head>
+    <body>
+    
+    <script>
+        const socket = new WebSocket('wss://localhost:8443/ws/');
+    
+        // Connection opened
+        socket.addEventListener('open', (event) => {
+            console.log('WebSocket connection opened:', event);
+            socket.send('Hello, server!');
+        });
+    
+        // Listen for messages
+        socket.addEventListener('message', (event) => {
+            console.log('Received message:', event.data);
+        });
+    
+        // Connection closed
+        socket.addEventListener('close', (event) => {
+            console.log('WebSocket connection closed:', event);
+        });
+    
+        // Connection error
+        socket.addEventListener('error', (event) => {
+            console.error('WebSocket error:', event);
+        });
+    </script>
+    
+    </body>
+    </html>"#,
     )
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // https://stackoverflow.com/questions/73255421/actix-web-requested-application-data-is-not-configured-correctly-view-enable-d
     std::env::set_var("RUST_LOG", "debug");
     env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
 
@@ -50,6 +87,7 @@ async fn main() -> std::io::Result<()> {
             // Enable CORS for all origins
             .wrap(
                 Cors::default()
+                    // .allowed_origin("http://localhost:5173")
                     .allow_any_origin()
                     .allow_any_header()
                     .allow_any_method()
