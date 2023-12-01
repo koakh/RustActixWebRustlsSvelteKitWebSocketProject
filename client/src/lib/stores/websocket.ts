@@ -2,7 +2,6 @@ import { log } from '$lib';
 import { MessageToClientType } from '$lib/types';
 import { writable } from 'svelte/store';
 import { type IMessageEvent, type IStringified, w3cwebsocket as W3CWebSocket } from 'websocket';
-
 import { appConstants as c } from '../constants';
 
 const createWebSocket = () => {
@@ -16,10 +15,11 @@ const createWebSocket = () => {
   const wsConnect = () => {
     // prepare wsUri
     client = new W3CWebSocket(c.VALUES.apiUrlWs as string, undefined, undefined, undefined, {}, {
+      // Disable certificate validation
       // webSocketVersion: 13,
       tlsOptions: {
         rejectUnauthorized: false,
-        // servername: 'localhost'
+        // servername: 'localhost',
       }
     });
     log(`ws: wsUri: ${c.VALUES.apiUrlWs}`);

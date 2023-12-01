@@ -1,6 +1,16 @@
 TODO:
-  ☐ @critical use tauri certs here to check if works
-  ☐ try use this certificates in tauri project
+  ✔ @critical use tauri certs here to check if works @done(23-11-24 23:09)
+    doesn't work
+  ✔ try use this certificates in tauri project @done(23-11-24 23:09)
+    doesn't work
   ☐ websocat -k wss://localhost:8443/ws/ | jq
-  ☐ rename server.rs and Server to WebSocketServer
+  ☐ rename `server.rs` and Server to `WebSocketServer`
   ☐ move from main and web_socket_server to to websocket module and clean up project
+  ☐ create new certicates and test it, make notes to
+    mkcert -key-file key.pem -cert-file cert.pem 127.0.0.1 localhost
+  ☐ Store Rustls Links and Tabs
+
+  ☐ add example of how to use `CERT_KEY_PEM` and `CERT_CERT_FILE` from `constants.rs`
+  
+  ☐ store links
+  // https://stackoverflow.com/questions/73255421/actix-web-requested-application-data-is-not-configured-correctly-view-enable-d
