@@ -1,4 +1,7 @@
 TODO:
+  ☐ @critical undo tryes, and use double socket server, merge with other poc
+
+
   ✔ @critical use tauri certs here to check if works @done(23-11-24 23:09)
     doesn't work
   ✔ try use this certificates in tauri project @done(23-11-24 23:09)

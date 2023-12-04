@@ -1,11 +1,11 @@
 [package]
-name = "app"
+name = "tauri-ws-poc"
 version = "0.1.0"
 description = "A Tauri App"
 authors = ["you"]
 license = ""
 repository = ""
-default-run = "app"
+default-run = "tauri-ws-poc"
 edition = "2021"
 rust-version = "1.60"
 
@@ -15,12 +15,33 @@ rust-version = "1.60"
 tauri-build = { version = "1.5.0", features = [] }
 
 [dependencies]
+tauri = { version = "1.5.2", features = [] }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.5.2", features = [] }
+log = "^0.4"
+tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1", features = [
+  "colored",
+] }
+actix = "0.13.1"
+actix-cors = "0.6.4"
+actix-files = "0.6.2"
+actix-web = {version = "4.4.0",  features = ["rustls-0_21"] }
+actix-web-actors = "4.2.0"
+env_logger = "0.10.1"
+rustls = "0.21.9"
+rustls-pemfile = "1"
+uuid = { version = "1.6.1", features = ["serde", "v4"] }
+machine-uid = "0.5.1"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.
 # If you use cargo directly instead of tauri's cli you can use this feature flag to switch between tauri's `dev` and `build` modes.
 # DO NOT REMOVE!!
-custom-protocol = [ "tauri/custom-protocol" ]
+custom-protocol = ["tauri/custom-protocol"]
+
+# How I Improved My Rust Compile Times by 75%
+# https://benw.is/posts/how-i-improved-my-rust-compile-times-by-seventy-five-percent
+[profile.dev]
+opt-level = 1
+[profile.dev.package."*"]
+opt-level = 3

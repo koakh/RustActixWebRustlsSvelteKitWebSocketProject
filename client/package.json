@@ -33,6 +33,8 @@
 	},
 	"dependencies": {
 		"@types/websocket": "^1.0.9",
-		"websocket": "^1.0.34"
+		"tauri-plugin-log-api": "github:tauri-apps/tauri-plugin-log",
+		"websocket": "^1.0.34",
+		"ws": "^8.14.2"
 	}
 }
