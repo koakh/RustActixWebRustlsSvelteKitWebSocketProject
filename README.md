@@ -35,7 +35,8 @@ $ cargo run
    1. go to <https://localhost:8443> or <https://localhost:8443/index.html>
 2. test https websockets (WARN must accept certificates in browser to work)
    1. https://localhost:8443/static/ws.html
-3. `websocat -k wss://192.168.1.84:8443/ws/`
+3. test https server `websocat -k wss://192.168.1.84:8443/ws/`
+4. test http server `websocat -k ws://192.168.1.84:8080/ws/`
 
 ### Client
 
