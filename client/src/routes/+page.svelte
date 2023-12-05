@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { websocket } from '$lib/stores/websocket';
+	import { onMount } from 'svelte';
 
 	onMount(() => {
-		// TODO:
-		// websocket.connect('ws://localhost:3001');
 		websocket.connect();
 		// unMount cleanup
 		return () => {
@@ -14,7 +12,7 @@
 
 	let message = '';
 
-  // TODO: actixweb seems that don't manage websockets send messages, we use requests
+  // actixweb seems that don't manage websockets send messages, we use requests
 	const sendMessage = () => {
 		websocket.send(JSON.stringify({message}));
 		message = '';

@@ -3,12 +3,17 @@ use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_json::{error::Result as SerdeResult, to_string, Value};
 use std::collections::HashMap;
+use std::time::Instant;
+use actix_web_actors::ws::{self, ProtocolError};
+use uuid::Uuid;
+use actix::prelude::{Addr, StreamHandler};
+use actix_web::{Error, HttpRequest, HttpResponse, web};
 
 #[derive(ActixMessage)]
 #[rtype(result = "()")]
 pub struct Message(pub String);
 
-#[derive(ActixMessage, Deserialize, Serialize)]
+#[derive(Debug, ActixMessage, Deserialize, Serialize)]
 #[rtype(result = "()")]
 pub struct MessageToClient {
   pub msg_type: String,
@@ -86,4 +91,59 @@ impl Handler<MessageToClient> for Server {
     debug!("handle messageToClient: sessionsLen: {}", self.sessions.len());
     self.send_message(to_string(&msg));
   }
+}
+
+/// Define your WebSocket session actor
+
+pub struct MyWebSocketSession {
+  _id: String,
+  _hb: Instant,
+  _server_addr: Addr<Server>,
+}
+
+impl MyWebSocketSession {
+  fn new(server_addr: Addr<Server>) -> Self {
+      Self {
+          _id: Uuid::new_v4().to_string(),
+          _hb: Instant::now(),
+          _server_addr: server_addr,
+      }
+  }
+}
+
+impl Actor for MyWebSocketSession {
+  type Context = ws::WebsocketContext<Self>;
+
+  fn started(&mut self, _ctx: &mut Self::Context) {
+      println!("WebSocket session started");
+  }
+}
+
+impl StreamHandler<Result<ws::Message, ProtocolError>> for MyWebSocketSession {
+  fn handle(&mut self, msg: Result<ws::Message, ProtocolError>, ctx: &mut Self::Context) {
+      match msg {
+          Ok(ws::Message::Ping(msg)) => {
+              ctx.pong(&msg);
+          }
+          Ok(ws::Message::Text(text)) => {
+              // Handle incoming text message
+              ctx.text(text);
+          }
+          _ => (),
+      }
+  }
+}
+
+pub async fn ws_index(
+  req: HttpRequest,
+  stream: web::Payload,
+  server_addr: web::Data<Addr<Server>>,
+) -> Result<HttpResponse, Error> {
+  let res = ws::start(
+      MyWebSocketSession::new(server_addr.get_ref().clone()),
+      &req,
+      stream,
+  )?;
+
+  Ok(res)
 }

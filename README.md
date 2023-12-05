@@ -19,19 +19,6 @@ $ mkdir /tmp/certs
 $ cd /tmp/certs
 
 $ mkcert -key-file key.pem -cert-file cert.pem 127.0.0.1 localhost
-
-Note: the local CA is not installed in the system trust store.
-Note: the local CA is not installed in the Firefox and/or Chrome/Chromium trust store.
-
-Run "mkcert -install" for certificates to be trusted automatically
-
-Created a new certificate valid for the following names
- - "127.0.0.1"
- - "localhost"
-
-The certificate is at "cert.pem" and the key at "key.pem"
-
-It will expire on 2 March 2026 🗓
 ```
 
 ## Run Project
@@ -43,6 +30,12 @@ $ cd server
 $ cargo run
 [2023-11-30T22:18:36Z INFO  actixweb_rustls_server_example] starting HTTPS server at https://localhost:8443
 ```
+
+1. test https endpoints 
+   1. go to <https://localhost:8443> or <https://localhost:8443/index.html>
+2. test https websockets (WARN must accept certificates in browser to work)
+   1. https://localhost:8443/static/ws.html
+3. `websocat -k wss://192.168.1.84:8443/ws/`
 
 ### Client
 

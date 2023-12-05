@@ -1,43 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Client Example</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>WebSocket Client Example</title>
 </head>
 <body>
-    <h1>WebSocket Client Example</h1>
-    <div id="output"></div>
+	<h1>WebSocket Client Example</h1>
+	<p>div output</p>
+	<div id="output"></div>
 
-    <script>
-        const socket = new WebSocket('wss://localhost:8443/ws/', null, null, null, {
-            rejectUnauthorized: false
-        });
+	<script>
+		const socket = new WebSocket('wss://localhost:8443/ws/', null, null, null, {
+			// doesn't work, always must accept the certificate in browser
+			rejectUnauthorized: false
+		});
 
-        socket.addEventListener('open', (event) => {
-            console.log('WebSocket connection opened:', event);
-            socket.send('Hello, WebSocket!');
-        });
+		socket.addEventListener('open', (event) => {
+			console.log('WebSocket connection opened:', event);
+			socket.send('Hello, WebSocket!');
+		});
 
-        socket.addEventListener('message', (event) => {
-            console.log('Message from server:', event.data);
-            const outputDiv = document.getElementById('output');
-            outputDiv.innerHTML += `<p>${event.data}</p>`;
-        });
+		socket.addEventListener('message', (event) => {
+			console.log('Message from server:', event.data);
+			const outputDiv = document.getElementById('output');
+			outputDiv.innerHTML += `<p>${event.data}</p>`;
+		});
 
-        socket.addEventListener('close', (event) => {
-            console.log('WebSocket connection closed:', event);
+		socket.addEventListener('close', (event) => {
+			console.log('WebSocket connection closed:', event);
 
-            if (event.wasClean) {
-                console.log(`Connection closed cleanly, code=${event.code}, reason=${event.reason}`);
-            } else {
-                console.error(`Connection abruptly closed`);
-            }
-        });
+			if (event.wasClean) {
+				console.log(`Connection closed cleanly, code=${event.code}, reason=${event.reason}`);
+			} else {
+				console.error(`Connection abruptly closed`);
+			}
+		});
 
-        socket.addEventListener('error', (event) => {
-            console.error('WebSocket error:', event);
-        });
-    </script>
+		socket.addEventListener('error', (event) => {
+			console.error('WebSocket error:', event);
+		});
+	</script>
 </body>
 </html>

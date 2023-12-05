@@ -3,16 +3,20 @@ pub const APP_NAME: &str = "tauri-ws-poc";
 pub const API_PATH: &str = "/api";
 pub const HTTP_SERVER_KEEP_ALIVE: u64 = 30;
 // env variables
-pub const DEFAULT_HTTP_SERVER_URI: &str = "0.0.0.0:8443";
-pub const DEFAULT_HTTP_SERVER_API_KEY: &str = "Uffpwzm5Ahx5zWVWi6H0LZnQnmYA4uelif2U54ATqDO0rORRMQRvnA1zuAnQkKU3bC6T4RI9EghIcwBaXKkenkT0t9jVdoaAMXQsKjFFGDn7oSvfTcSaU5YYKtY1ydwn";
-pub const DEFAULT_HTTP_SERVER_ENABLE_HTTPS: bool = true;
+
+pub const DEFAULT_HTTP_SERVER_API_KEY: &str = "SECRET-CAN-BE-EXPOSED";
+pub const DEFAULT_HTTP_SERVER_URI: &str = "0.0.0.0:8080";
+pub const DEFAULT_HTTPS_SERVER_URI: &str = "0.0.0.0:8443";
+pub const DEFAULT_HTTPS_SERVER_ENABLE_HTTPS: bool = true;
 // debug
 pub const DEFAULT_LOG_ACTIXWEB_MIDDLEWARE_FORMAT: &str = r#""%r" %s %b "%{User-Agent}i" %D"#;
 // spawn thread
 pub const DEFAULT_SPAWN_THREAD_ENABLED: bool = false;
-pub const DEFAULT_SPAWN_THREAD_DURATION_SECONDS: u64 = 30;
+pub const DEFAULT_SPAWN_THREAD_DURATION_SECONDS: u64 = 5;
 
 // bellow certificates are just for development environment,can be public exposed, no problemo
+
+// certificates can be exposed, only used in local dev environment
 
 // raw certificates this is prevent expose and add tauri external files
 pub const CERT_KEY_PEM: &str = r#"-----BEGIN PRIVATE KEY-----

@@ -1,72 +1,31 @@
+use std::time::Duration;
 use std::{fs::File, io::BufReader};
-
-use actix::prelude::{Actor, Addr, StreamHandler};
+use actix::prelude::Actor;
+use actix::spawn;
 use actix_cors::Cors;
 use actix_files::Files;
+use actix_web::rt::time;
 use actix_web::web::Data;
-use actix_web::Error;
 use actix_web::{
-    http::header::ContentType, middleware, web, App, HttpRequest, HttpResponse, HttpServer,
-};
-use actix_web_actors::ws::{self, ProtocolError};
-use log::debug;
+    http::header::ContentType, middleware, web, App, HttpRequest, HttpResponse, HttpServer,};
+use log::{debug, error};
 use rustls::{Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
-use std::time::Instant;
-use uuid::Uuid;
+use serde_json::json;
 
 mod constants;
-mod server;
+mod socket_server;
 pub use self::constants::*;
-pub use self::server::*;
+pub use self::socket_server::*;
 
 /// simple handle
 async fn index(req: HttpRequest) -> HttpResponse {
     debug!("{req:?}");
-
-    // HttpResponse::Ok().content_type(ContentType::html()).body(
-    //     "<!DOCTYPE html><html><body>\
-    //         <p>Welcome to your TLS-secured homepage!</p>\
-    //         <p>test <a href='static/ws.html'>websockets</a></p>
-    //     </body></html>",
-    // )
     HttpResponse::Ok().content_type(ContentType::html()).body(
-    r#"<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>WebSocket Example</title>
-    </head>
-    <body>
-    
-    <script>
-        const socket = new WebSocket('wss://localhost:8443/ws/');
-    
-        // Connection opened
-        socket.addEventListener('open', (event) => {
-            console.log('WebSocket connection opened:', event);
-            socket.send('Hello, server!');
-        });
-    
-        // Listen for messages
-        socket.addEventListener('message', (event) => {
-            console.log('Received message:', event.data);
-        });
-    
-        // Connection closed
-        socket.addEventListener('close', (event) => {
-            console.log('WebSocket connection closed:', event);
-        });
-    
-        // Connection error
-        socket.addEventListener('error', (event) => {
-            console.error('WebSocket error:', event);
-        });
-    </script>
-    
-    </body>
-    </html>"#,
+        "<!DOCTYPE html><html><body>\
+            <p>Welcome to your TLS-secured homepage!</p>\
+            <p>test <a href='static/ws.html'>websockets</a></p>
+        </body></html>",
     )
 }
 
@@ -76,7 +35,27 @@ async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
 
     let config = load_rustls_config();
-    let ws_server = Server::new().start();
+    let socket_server = Server::new().start();
+
+    let ws_server_spawn = socket_server.clone();
+    spawn(async move {
+        let mut interval = time::interval(Duration::from_secs(5));
+        let mut i = -1;
+        loop {
+            i += 1;
+            interval.tick().await;
+            // do something
+            let msg_type = &format!("{}", String::from("echo"))[..];
+            let json = json!({ "message": format!("hello message: #{}", i) });
+            let message_to_client = MessageToClient::new(msg_type, json);
+            match ws_server_spawn.send(message_to_client).await {
+                Ok(_) => {
+                    debug!("socket server sent message #{} to client", i);
+                }
+                Err(e) => error!("{:?}", e),
+            };
+        }
+    });
 
     log::info!("starting HTTPS server at https://localhost:8443");
 
@@ -84,10 +63,10 @@ async fn main() -> std::io::Result<()> {
         App::new()
             // enable logger
             .wrap(middleware::Logger::default())
-            // Enable CORS for all origins
             .wrap(
                 Cors::default()
                     // .allowed_origin("http://localhost:5173")
+                    // Enable CORS for all origins
                     .allow_any_origin()
                     .allow_any_header()
                     .allow_any_method()
@@ -95,12 +74,14 @@ async fn main() -> std::io::Result<()> {
             )
             // WebSocket route
             // inject ws_server in context
-            .app_data(Data::new(ws_server.clone()))
+            .app_data(Data::new(socket_server.clone()))
             // webSockets: TRICK /ws/ route must be before / and others to prevent problems
             .route("/ws/", web::get().to(ws_index))
             // register simple handler, handle all methods
             .service(web::resource("/index.html").to(index))
+            // redirect to index
             .service(web::redirect("/", "/index.html"))
+            // static files
             .service(Files::new("/static", "static"))
     })
     .bind_rustls_021("0.0.0.0:8443", config)?
@@ -138,58 +119,4 @@ fn load_rustls_config() -> rustls::ServerConfig {
     }
 
     config.with_single_cert(cert_chain, keys.remove(0)).unwrap()
-}
-
-/// Define your WebSocket session actor
-pub struct MyWebSocketSession {
-    id: String,
-    hb: Instant,
-    server_addr: Addr<Server>,
-}
-
-impl MyWebSocketSession {
-    fn new(server_addr: Addr<Server>) -> Self {
-        Self {
-            id: Uuid::new_v4().to_string(),
-            hb: Instant::now(),
-            server_addr,
-        }
-    }
-}
-
-impl Actor for MyWebSocketSession {
-    type Context = ws::WebsocketContext<Self>;
-
-    fn started(&mut self, ctx: &mut Self::Context) {
-        println!("WebSocket session started");
-    }
-}
-
-impl StreamHandler<Result<ws::Message, ProtocolError>> for MyWebSocketSession {
-    fn handle(&mut self, msg: Result<ws::Message, ProtocolError>, ctx: &mut Self::Context) {
-        match msg {
-            Ok(ws::Message::Ping(msg)) => {
-                ctx.pong(&msg);
-            }
-            Ok(ws::Message::Text(text)) => {
-                // Handle incoming text message
-                ctx.text(text);
-            }
-            _ => (),
-        }
-    }
-}
-
-pub async fn ws_index(
-    req: HttpRequest,
-    stream: web::Payload,
-    server_addr: web::Data<Addr<Server>>,
-) -> Result<HttpResponse, Error> {
-    let res = ws::start(
-        MyWebSocketSession::new(server_addr.get_ref().clone()),
-        &req,
-        stream,
-    )?;
-
-    Ok(res)
 }
