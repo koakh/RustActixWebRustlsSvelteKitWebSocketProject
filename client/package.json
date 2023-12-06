@@ -13,28 +13,27 @@
 		"format": "prettier --write ."
 	},
 	"type": "module",
+	"dependencies": {
+		"tauri-plugin-log-api": "github:tauri-apps/tauri-plugin-log",
+		"websocket": "^1.0.34"
+	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/adapter-static": "^2.0.3",
 		"@sveltejs/kit": "^1.27.4",
 		"@types/node": "^20.9.1",
+		"@types/websocket": "^1.0.9",
 		"@typescript-eslint/eslint-plugin": "^6.0.0",
 		"@typescript-eslint/parser": "^6.0.0",
-		"eslint": "^8.28.0",
 		"eslint-config-prettier": "^9.0.0",
 		"eslint-plugin-svelte": "^2.30.0",
-		"prettier": "^3.0.0",
+		"eslint": "^8.28.0",
 		"prettier-plugin-svelte": "^3.0.0",
-		"svelte": "^4.0.5",
+		"prettier": "^3.0.0",
 		"svelte-check": "^3.6.0",
+		"svelte": "^4.0.5",
 		"tslib": "^2.4.1",
 		"typescript": "^5.0.0",
 		"vite": "^4.4.2"
-	},
-	"dependencies": {
-		"@types/websocket": "^1.0.9",
-		"tauri-plugin-log-api": "github:tauri-apps/tauri-plugin-log",
-		"websocket": "^1.0.34",
-		"ws": "^8.14.2"
 	}
 }

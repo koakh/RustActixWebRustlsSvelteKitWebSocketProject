@@ -10,6 +10,11 @@ const VALUES: { [key: string]: unknown } = {
   wsReconnectTimeout: 1500,
 };
 
+const I18N: { [key: string]: unknown } = {
+  milliSeconds: 'milliSeconds'
+};
+
 export const appConstants = {
   VALUES,
+  I18N,
 };
